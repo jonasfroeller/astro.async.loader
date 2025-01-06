@@ -1,93 +1,96 @@
-<div class="async-iframe-wrapper">
-  <div class="loader-container">
-    <div class="loader"></div>
+<div class="async-iframe__wrapper">
+  <div class="async-iframe__loader-container">
+    <div class="async-iframe__loader"></div>
   </div>
 
-  <div class="iframe-container">
+  <div class="async-iframe__container">
     <slot />
   </div>
 </div>
 
 <script>
-  function setupIframe() {
-    const wrapper = document.getElementsByClassName('async-iframe-wrapper')[0];
-    const loaderContainer = wrapper.getElementsByClassName('loader-container')[0];
-    const iframe = wrapper.querySelector('iframe');
-      
-    if (iframe && loaderContainer) {
-      const handleLoad = () => {
-        loaderContainer.classList.add('hidden');
-        iframe.removeEventListener('load', handleLoad);
-      };
-      
-      iframe.addEventListener('load', handleLoad);
+  function setupIframes() {
+    const wrappers = document.getElementsByClassName('async-iframe__wrapper');
+    
+    for (let i = 0; i < wrappers.length; i++) {
+      const wrapper = wrappers[i];
+      const loaderContainer = wrapper.getElementsByClassName('async-iframe__loader-container')[0];
+      const iframe = wrapper.getElementsByTagName('iframe')[0];
+        
+      if (iframe && loaderContainer) {
+        const handleLoad = () => {
+          loaderContainer.classList.add('async-iframe__hidden');
+          iframe.removeEventListener('load', handleLoad);
+        };
+        
+        iframe.addEventListener('load', handleLoad);
+      }
     }
   }
 
   if (document.readyState === 'loading') {
     const handleDOMContentLoaded = () => {
-      setupIframe();
+      setupIframes();
       document.removeEventListener('DOMContentLoaded', handleDOMContentLoaded);
     };
     
     document.addEventListener('DOMContentLoaded', handleDOMContentLoaded);
   } else {
-    setupIframe();
+    setupIframes();
   }
 </script>
 
 <style>
-  .async-iframe-wrapper {
+  .async-iframe__wrapper {
     position: relative;
     padding-top: 85%;
     height: 0;
     overflow: hidden;
   }
   
-  .loader-container {
+  .async-iframe__loader-container {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    z-index: 5;
+    background: rgba(255, 255, 255, 0.9);
   }
 
-  .loader {
+  .async-iframe__loader {
     width: 2rem;
     height: 2rem;
     border-radius: 50%;
     border: 0.125rem solid transparent;
     border-top-color: #3b82f6;
-    animation: spin 1s linear infinite;
+    animation: async-iframe__spin 1s linear infinite;
   }
 
-  @keyframes spin {
+  @keyframes async-iframe__spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
   }
 
-  .iframe-container {
+  .async-iframe__container {
     position: absolute;
-    top: 0px;
-    left: 0px;
-    right: 0px;
-    bottom: 0px;
+    inset: 0;
   }
 
   :global(iframe) {
     position: absolute;
-    top: 0px;
-    left: 0px;
+    inset: 0;
     width: 100%;
     height: 100%;
-    border: 0px;
+    border: 0;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
   }
 
-  .hidden {
+  .async-iframe__hidden {
     display: none !important;
+  }
+
+  .async-iframe__hidden + .async-iframe__container :global(iframe) {
+    opacity: 1;
   }
 </style>
